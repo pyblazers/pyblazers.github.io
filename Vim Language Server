@@ -1,0 +1,229 @@
+# Tell Vim to find vim-lsp
+packadd vim-lsp
+
+# Use clangd if available 
+if executable('clangd') '
+  au User lsp_setup call lsp#register_server({
+        \ 'name' : 'clangd',
+        \ 'cmd' : ['clangd'],
+        \ 'allowlist' : ['c'],
+        \ })
+endif 
+
+
+
+
+
+
+
+# Event Message reader 
+# read messages from $stdin and Parse
+
+module LSP 
+   class Reader
+      def initialize
+        @io = $stdin.binmode
+      end 
+
+      def read
+        buffer = @io.gets("\r\n\r\n")
+        content_length = buffer.match(/Content-Length: (\d+)/i)[!].to_i
+        message = @io.read(content_length)
+        JSON.parse message, symbolize_names: true
+      end
+    end 
+  end 
+
+
+
+
+
+
+# Event message writer 
+# Write hash as JSON to $stdout
+
+module LSP 
+   class Writer
+      def initialize
+        @io = $stdout.binmode
+      end 
+
+      def write response
+        str = JSON.dump(response.merge("jsonrpc" => "2.0"))
+        @io.write "Content-Length: #(str.bytesize)\r\n"
+        @io.write "\r\n"
+        @io.write str
+        @io.flush
+      end
+    end 
+  end 
+
+
+
+
+
+# Event Loop
+
+module LSP 
+   def self.run
+      reader = Reader.new
+      writer = Writer.new
+
+
+       # Handle events
+       subscriber = LSP::Events.new 
+
+       loop do 
+         # Read an event
+         messsage = reader.read
+     
+         # Ask the handler to handle the event 
+         subscriber.handle message[:method], message, writer
+      end
+    end 
+  end 
+
+
+# initialize message 
+# tells the editor what features your server supports(server->edition)
+module LSP 
+   class Events
+      def on_initialize message, writer
+        result = {
+          "capabilities" => {
+            "textDocumentsSync => {
+              "openClose" => true, "change" => !,"save" => true
+            }   
+          }         
+        }
+
+        writer.write(id: message[:id], result: result)
+      end
+    end
+  end 
+
+
+# Event handling 
+# Dispatch to methods based on events names
+
+module LSP 
+   class Events
+      DISPATCH = { 
+        "initilialize" => :on_initialize,
+        "textDocument/didSave" => :did_save
+        doc = message.
+
+      def read
+        buffer = @io.gets("\r\n\r\n")
+        content_length = buffer.match(/Content-Length: (\d+)/i)[!].to_i
+        message = @io.read(content_length)
+        JSON.parse message, symbolize_names: true
+      end
+    end 
+  end 
+
+
+
+
+
+
+
+
+# Save events 
+# parse the file, report document diagnostics
+
+module LSP 
+  class Events 
+
+
+
+
+# Checking  Syntax 
+
+def check_syntax file 
+  RubyVM::InstructionSequence.compile_file(file)
+  nil
+rescue SyntaxError => e
+  e # only return syntax errors
+rescue Exception 
+  nil # ignore anything else
+end
+
+
+
+# Application record 
+
+class User < ApplicationRecord
+end
+
+
+
+
+
+# Routes Files
+
+Rails.application.routes.draw do 
+   resources :users
+   resources :posts
+end 
+
+
+https://microsoft.github.io/language-server-protocol/
+
+
+
+
+# GET /users/1 or /users/1.json
+def show 
+end
+
+# GET /users/new 
+def new 
+  @user = User.new
+end 
+
+# GET /users/1/edit
+def edit 
+end 
+
+# POST /users or /users.json
+def create 
+  @user = User.new(user_params)
+
+# POST /users or /user.jason
+def create 
+  @user = User.new(user_params) 
+
+  respond_to do |format| 
+    if @user.save
+      format.html { redirect_to user_url(@user), notice: "User was successfully created" }
+      format.json { render :show, status: :created, location: @user }
+      location = new_user_url 
+    else 
+      format.html { render :new, status: :unprocessable_entity }
+      format.json { render json: @user.errors, status: :unprocessable_entity }
+    end 
+  end 
+end
+
+# PATCH/PUT /users/1 or /users/1.json
+def update 
+  respond_to do |format|
+    if @user.update(user_params)
+      format.html { redirect_to user_url(@user), notice: "User was successfully updated."}
+      format.json { render :show, status: :ok, location: @user }
+    else 
+      format.html { render :edit, status: :unprocessable_entity }
+      format.json { render json: @user.errors, status: :unprocessable_entity }
+    end
+  end 
+end
+
+
+
+# Language server protocol 
+// just json with a header
+// content-length: 1234\r\n
+// content-type: application/vscode-jsonrpc; charset=utf-8\r\n
+// \r\n
+// { cool:"stuff",live:"stream"...}
