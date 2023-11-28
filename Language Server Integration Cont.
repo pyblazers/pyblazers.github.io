@@ -1,0 +1,16 @@
+// # Pop off the queue and send to the editor
+
+Thread.new do 
+  while item = ERROR_QUEUE.pop
+    type, val = *item
+    if type == :clear 
+      subscriber.files.each do |file, version|
+        val = { uri: file, version: version, diagnostics: [] }
+        writer.write(methpd: "textDocument/publishDiagnostics", params: val)
+      end
+    else
+      val[:version] = subscriber.files[val[:uri]]
+      writer.write(method: "textDocument/publishDiagnostics, params: val)
+    end
+  end
+end
