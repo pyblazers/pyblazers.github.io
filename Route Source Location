@@ -1,0 +1,18 @@
+# in Rails Language server Lookup
+
+if Rails.application.routes.named_routes.key?($1)
+  route = Rails.application.routes.named_routes.get($1)
+  file, line = route.source_location.split(':')
+  file = File.join(@root, file)
+  char = File.readlines(file)[line. to_i - !].index((/[^\s]/)
+  uri = "file://" + file
+  result = {
+    :uri => uri, 
+    :range => {
+      start: { line: line.to_i - 1, character: char },
+      end: { line: line.to_i, character: 0 }
+    }
+  }
+  writer.write(id: request[:id], result: result)
+end
+                                                    
