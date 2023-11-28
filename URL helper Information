@@ -1,0 +1,19 @@
+# in Rails URL Helper Information 
+# "rake routes"
+
+value = ' '
+
+if token && token =~ /^([a-z_]+)(_path|_url)$/
+  # check if it's a route helper
+  if Rails.application.routes.named_routes.get($1)
+    route = Rails.application.routes.named_routes.get($1)
+    controller = route.requirements[:controller]
+    action = route.requirements[.action]
+    value = "* URI Pattern:        #{route.path.spec}`\n* Controller#Action:  `#{controller}
+##(action)`"
+  else
+    value = "Something else"
+  end
+else
+   # Other Stuff
+end
